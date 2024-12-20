@@ -1,0 +1,8 @@
+*.a
+*.bin
+*.jpeg
+*.jpg
+*.o
+*.png
+vncpasswd
+vncsnapshot
