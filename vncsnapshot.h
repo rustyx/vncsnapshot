@@ -23,6 +23,7 @@
  * vncviewer.h
  */
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -43,15 +44,15 @@ extern int endianTest;
 #endif
 
 #define Swap16IfLE(s) \
-    (*(char *)&endianTest ? ((((s) & 0xff) << 8) | (((s) >> 8) & 0xff)) : (s))
+    (*(char *)&endianTest ? ((((CARD16)(s) & 0xffu) << 8u) | (((CARD16)(s) >> 8u) & 0xffu)) : (CARD16)(s))
 
 #define Swap32IfLE(l) \
-    (*(char *)&endianTest ? ((((l) & 0xff000000) >> 24) | \
-			     (((l) & 0x00ff0000) >> 8)  | \
-			     (((l) & 0x0000ff00) << 8)  | \
-			     (((l) & 0x000000ff) << 24))  : (l))
+    (*(char *)&endianTest ? ((((CARD32)(l) & 0xff000000u) >> 24u) | \
+			     (((CARD32)(l) & 0x00ff0000u) >> 8u)  | \
+			     (((CARD32)(l) & 0x0000ff00u) << 8u)  | \
+			     ((((CARD32)l) & 0x000000ffu) << 24u))  : (CARD32)(l))
 
-#define MAX_ENCODINGS 20
+#define MAX_ENCODINGS 40
 
 #define FLASH_PORT_OFFSET 5400
 #define LISTEN_PORT_OFFSET 5500
@@ -137,11 +138,6 @@ extern void ShrinkBuffer(long x, long y, long req_width, long req_height);
 extern void write_JPEG_file (char * filename, int quality, int width, int height);
 extern int BufferIsBlank();
 extern int BufferWritten();
-
-/* colour.c */
-
-extern unsigned long BGR233ToPixel[];
-
 
 /* cursor.c */
 

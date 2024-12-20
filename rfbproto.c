@@ -731,8 +731,8 @@ HandleRFBServerMessage()
   }
 
   default:
-    fprintf(stderr,"Warning: unknown message type %d from VNC server\n",msg.type);
-    return True;
+    fprintf(stderr, "Error: unknown message type %d from VNC server\n",msg.type);
+    return False;
   }
 
   return True;

@@ -58,6 +58,8 @@
  * affecting alignment.
  */
 
+#pragma pack(push, 1)
+
 typedef struct {
     CARD16 x;
     CARD16 y;
@@ -1198,3 +1200,5 @@ typedef union {
     rfbSetSWMsg sw;
     rfbTextChatMsg tc;
 } rfbClientToServerMsg;
+
+#pragma pack(pop)
