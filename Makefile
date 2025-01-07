@@ -9,6 +9,7 @@ ZLIB_INCLUDE = -I/usr/local/include
 ZLIB_LIB = -L/usr/local/lib -lz
 JPEG_INCLUDE = -I/usr/local/include
 JPEG_LIB = -L/usr/local/lib -ljpeg
+PNG_LIB = -lpng
 
 
 # Other libraries:
@@ -21,7 +22,7 @@ EXTRAINCLUDES =
 
 # Compilation Flags. Season to taste.
 CC = gcc
-CDEBUGFLAGS = -O2 -Wall
+CDEBUGFLAGS = -O2 -Wall -Wno-unused-variable
 CXX=g++
 # You shouldn't need to change anything below.
 INCLUDES = -I. $(ZLIB_INCLUDE) $(JPEG_INCLUDE) $(EXTRAINCLUDES)
@@ -60,8 +61,8 @@ SUBDIRS=rdr.dir
 all: $(SUBDIRS:.dir=.all) vncsnapshot vncpasswd
 
 vncsnapshot: $(OBJS)
-#	${CXX} ${CXXFLAGS} ${LDFLAGS} -o $@ $(OBJS) rdr/librdr.a $(ZLIB_LIB) $(JPEG_LIB) $(EXTRALIBS)
-	$(LINK.cc) $(CDEBUGFLAGS) -o $@ $(OBJS) rdr/librdr.a $(ZLIB_LIB) $(JPEG_LIB) $(EXTRALIBS)
+#	${CXX} ${CXXFLAGS} ${LDFLAGS} -o $@ $(OBJS) rdr/librdr.a $(ZLIB_LIB) $(JPEG_LIB) $(PNG_LIB) $(EXTRALIBS)
+	$(LINK.cc) $(CDEBUGFLAGS) -o $@ $(OBJS) rdr/librdr.a $(ZLIB_LIB) $(JPEG_LIB) $(PNG_LIB) $(EXTRALIBS)
 
 vncpasswd: $(PASSWD_OBJS)
 #	${CXX} ${CXXFLAGS} ${LDFLAGS} -o $@ $(PASSWD_OBJS)

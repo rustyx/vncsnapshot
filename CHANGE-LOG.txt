@@ -1,3 +1,9 @@
+1.4
+ * Fix 64-bit compatibility
+ * Fix a security issue with printing the program name
+ * Add PNG support
+ * Add a default connect timeout of 10 s
+ * Upgrade zlib to version 1.3.1 and make it a submodule
 1.3
  * New feature: -nullpasswd option, allow blank (null) password
    when entering password interactively

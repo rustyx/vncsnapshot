@@ -59,12 +59,12 @@ typedef uint8_t  CARD8;
 #ifdef LITTLE_ENDIAN_HOST
 
 #define Swap16IfLE(s) \
-    ((CARD16) ((((s) & 0xff) << 8) | (((s) >> 8) & 0xff)))
+    ((CARD16) ((((CARD16)(s) & 0xffu) << 8u) | (((CARD16)(s) >> 8u) & 0xffu)))
 #define Swap32IfLE(l) \
-    ((CARD32) ((((l) & 0xff000000) >> 24) | \
-     (((l) & 0x00ff0000) >> 8)  | \
-	 (((l) & 0x0000ff00) << 8)  | \
-	 (((l) & 0x000000ff) << 24)))
+    ((CARD32) ((((CARD32)(l) & 0xff000000) >> 24u) | \
+     (((CARD32)(l) & 0x00ff0000u) >> 8u)  | \
+	 (((CARD32)(l) & 0x0000ff00u) << 8u)  | \
+	 (((CARD32)(l) & 0x000000ffu) << 24u)))
 
 #else
 

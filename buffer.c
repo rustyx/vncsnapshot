@@ -27,6 +27,8 @@ static const char *ID = "$Id: buffer.c,v 1.6 2004/09/09 00:22:33 grmcdorman Exp 
 /* jpeglib.h may redefine INT16 */
 #define INT16 jpegINT16
 #include <jpeglib.h>
+#include <png.h>
+#include <zlib.h>
 #include <stdio.h>
 #undef INT16
 
@@ -39,6 +41,7 @@ static char   bufferWritten = 0;
 #define RAW_BYTES_PER_PIXEL 3   /* size of pixel in raw buffer */
 #define MY_BYTES_PER_PIXEL 4    /* size of pixel in VNC buffer */
 #define MY_BITS_PER_PIXEL (MY_BYTES_PER_PIXEL*8)
+#define FILL_BYTE 0xBA
 
 int
 AllocateBuffer()
@@ -86,7 +89,7 @@ AllocateBuffer()
         return 0;
     }
 
-    memset(rawBuffer, 0xBA, bytes);
+    memset(rawBuffer, FILL_BYTE, bytes);
 
     return 1;
 }
@@ -94,26 +97,29 @@ AllocateBuffer()
 void
 CopyDataToScreen(char *buffer, int x, int y, int w, int h)
 {
-    int start;
-    int stride;
-    int row, col;
-    stride = si.framebufferWidth * RAW_BYTES_PER_PIXEL - w * RAW_BYTES_PER_PIXEL;
-    start = (x + y * si.framebufferWidth) * RAW_BYTES_PER_PIXEL;
+    int stride = (si.framebufferWidth - w) * RAW_BYTES_PER_PIXEL;
+    int start = (x + y * si.framebufferWidth) * RAW_BYTES_PER_PIXEL;
+    int isBlank = 1;
+    char *dest = rawBuffer + start;
 
-    bufferWritten = 1;
-
-    for (row = 0; row < h; row++) {
-        for (col = 0; col < w; col++) {
-            bufferBlank &= (buffer[0] == 0 &&
-                           buffer[1] == 0 &&
-                           buffer[2] == 0);
-            rawBuffer[start++] = *buffer++;
-            rawBuffer[start++] = *buffer++;
-            rawBuffer[start++] = *buffer++;
+    for (int row = 0; row < h; row++) {
+        for (int col = 0; col < w; col++) {
+            isBlank &= (buffer[0] == 0 &&
+                        buffer[1] == 0 &&
+                        buffer[2] == 0) ||
+                        (buffer[0] == (char)FILL_BYTE &&
+                         buffer[1] == (char)FILL_BYTE &&
+                         buffer[2] == (char)FILL_BYTE);
+            *dest++ = *buffer++;
+            *dest++ = *buffer++;
+            *dest++ = *buffer++;
             buffer++;   /* ignore 4th byte */
         }
-        start += stride;
+        dest += stride;
     }
+
+    bufferWritten = 1;
+    bufferBlank = isBlank;
 }
 
 char *
@@ -287,7 +293,7 @@ write_JPEG_file (char * filename, int quality, int width, int height)
      * Here the array is only one element long, but you could pass
      * more than one scanline at a time if that's more convenient.
      */
-    row_pointer[0] = & rawBuffer[cinfo.next_scanline * row_stride];
+    row_pointer[0] = (JSAMPROW)rawBuffer + cinfo.next_scanline * row_stride;
     (void) jpeg_write_scanlines(&cinfo, row_pointer, 1);
   }
 
@@ -354,3 +360,62 @@ ShrinkBuffer(long x, long y, long req_width, long req_height)
     
 }
   
+void
+write_PNG_file (char * filename, int width, int height)
+{
+  FILE *fp = fopen(filename, "wb");
+  if (!fp) {
+    perror(filename);
+    exit(1);
+  }
+
+  png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  if (!png) {
+    perror("png_create_write_struct");
+    exit(1);
+  }
+
+  png_infop info = png_create_info_struct(png);
+  if (!info) {
+    perror("png_create_info_struct");
+    exit(1);
+  }
+
+  if (setjmp(png_jmpbuf(png))) {
+    perror("png write failed");
+    exit(1);
+  }
+
+  png_init_io(png, fp);
+  png_set_compression_level(png, Z_BEST_COMPRESSION);
+
+  png_set_IHDR(
+    png,
+    info,
+    width, height,
+    8,
+    PNG_COLOR_TYPE_RGB,
+    PNG_INTERLACE_NONE,
+    PNG_COMPRESSION_TYPE_DEFAULT,
+    PNG_FILTER_TYPE_DEFAULT
+  );
+  png_write_info(png, info);
+
+  png_bytep *row_pointers = malloc(height * sizeof(png_bytep));
+  if (!row_pointers) {
+    perror("malloc");
+    exit(1);
+  }
+  for(int y = 0; y < height; y++) {
+    row_pointers[y] = (png_bytep)rawBuffer + y * width * 3;
+  }
+
+  png_write_image(png, row_pointers);
+  png_write_end(png, NULL);
+
+  free(row_pointers);
+
+  fclose(fp);
+
+  png_destroy_write_struct(&png, &info);
+}

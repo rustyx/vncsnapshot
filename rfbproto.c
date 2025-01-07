@@ -567,6 +567,10 @@ HandleRFBServerMessage()
 	continue;
       }
 
+      if (rect.encoding == rfbEncodingLastRect) {
+        break;
+      }
+
       if ((rect.r.x + rect.r.w > si.framebufferWidth) ||
 	  (rect.r.y + rect.r.h > si.framebufferHeight))
 	{
@@ -609,12 +613,13 @@ HandleRFBServerMessage()
       case rfbEncodingCopyRect:
       {
 	rfbCopyRect cr;
-          char *buffer;
+        char *buffer;
 
-	if (!ReadFromRFBServer((char *)&cr, sz_rfbCopyRect))
-	  return False;
+	if (!ReadFromRFBServer((char *)&cr, sz_rfbCopyRect)) {
+	    return False;
+        }
 
-          if (!BufferWritten()) {
+        if (!BufferWritten()) {
             /* Ignore attempts to do copy-rect when we have nothing to
              * copy from.
              */

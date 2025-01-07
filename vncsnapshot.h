@@ -52,7 +52,7 @@ extern int endianTest;
 			     (((CARD32)(l) & 0x0000ff00u) << 8u)  | \
 			     ((((CARD32)l) & 0x000000ffu) << 24u))  : (CARD32)(l))
 
-#define MAX_ENCODINGS 40
+#define MAX_ENCODINGS 64
 
 #define FLASH_PORT_OFFSET 5400
 #define LISTEN_PORT_OFFSET 5500
@@ -60,8 +60,7 @@ extern int endianTest;
 #define SERVER_PORT_OFFSET 5900
 
 #ifdef WIN32
-/* This is for the NetworkSimplicty installation of SSH */
-#define DEFAULT_SSH_CMD "C:\\Program Files\\NetworkSimplicity\\ssh.exe"
+#define DEFAULT_SSH_CMD "C:\\Windows\\System32\\OpenSSH\\ssh.exe"
 #else
 #define DEFAULT_SSH_CMD "/usr/bin/ssh"
 #endif
@@ -136,6 +135,7 @@ extern char *CopyScreenToData(int x, int y, int w, int h);
 extern void FillBufferRectangle(int x, int y, int w, int h, unsigned long pixel);
 extern void ShrinkBuffer(long x, long y, long req_width, long req_height);
 extern void write_JPEG_file (char * filename, int quality, int width, int height);
+void write_PNG_file (char * filename, int width, int height);
 extern int BufferIsBlank();
 extern int BufferWritten();
 

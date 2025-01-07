@@ -40,6 +40,22 @@ static void sleep(int seconds)
 }
 #endif
 
+static int endsWith(const char* s, const char* suffix)
+{
+  int len = strlen(s);
+  int suffixLen = strlen(suffix);
+  if (len < suffixLen) {
+    return 0;
+  }
+  for (int i = 1; i <= suffixLen; i++) {
+    if (tolower(s[len - i]) != tolower(suffix[suffixLen - i])) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -103,6 +119,7 @@ main(int argc, char **argv)
   SendSetPixelFormat();
   SendSetEncodings();
 
+  int is_png = endsWith(appData.outputFilename, ".png");
 
   /* Set up for mutiple images, if required */
   if (appData.count > 1) {
@@ -215,7 +232,11 @@ main(int argc, char **argv)
 
     /* shrink buffer to requested rectangle */
     ShrinkBuffer(appData.rectX, appData.rectY, appData.rectWidth, appData.rectHeight);
-    write_JPEG_file(filename, appData.saveQuality, appData.rectWidth, appData.rectHeight);
+    if (is_png) {
+      write_PNG_file(filename, appData.rectWidth, appData.rectHeight);
+    } else {
+      write_JPEG_file(filename, appData.saveQuality, appData.rectWidth, appData.rectHeight);
+    }
     if (!appData.quiet) {
       fprintf(stderr, "Image saved from %s %dx%d screen to ", vncServerName ? vncServerName : "(local host)",
               si.framebufferWidth, si.framebufferHeight);
