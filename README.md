@@ -70,6 +70,8 @@ Options:
 
 ## Our changes
 
+2025-01-05  Version 1.4 addresses 64-bit compatibility issues ands adds PNG output support.
+
 2017-07-13	Accept a password from STDIN if input is not a TTY:
 
 		echo -n "SECRET" | vnsnapshot ...
