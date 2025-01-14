@@ -338,8 +338,10 @@ Bool SendSetPixelFormat()
   spf.format.redMax = Swap16IfLE(spf.format.redMax);
   spf.format.greenMax = Swap16IfLE(spf.format.greenMax);
   spf.format.blueMax = Swap16IfLE(spf.format.blueMax);
+  if (!appData.quiet) {
     PrintPixelFormat(&myFormat);
-
+  }
+  
   return WriteToRFBServer((char *)&spf, sz_rfbSetPixelFormatMsg);
 }
 
